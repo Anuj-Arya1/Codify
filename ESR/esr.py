@@ -1,7 +1,28 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
+try:
+    from scipy.optimize import curve_fit
+except Exception:
+    # Lightweight fallback for scipy.optimize.curve_fit when SciPy is not installed.
+    # This fallback only supports the specific sqrt_fit(x, a, b) = a*sqrt(x) + b used below.
+    def curve_fit(func, xdata, ydata, p0=None):
+        if func.__name__ == 'sqrt_fit':
+            # Build design matrix [sqrt(x), 1] and solve linear least squares for [a, b]
+            A = np.vstack([np.sqrt(xdata), np.ones_like(xdata)]).T
+            params, residuals, rank, s = np.linalg.lstsq(A, ydata, rcond=None)
+            # Estimate covariance matrix (approximate)
+            if len(ydata) > len(params) and residuals.size:
+                dof = len(ydata) - len(params)
+                residual_var = residuals[0] / dof
+                try:
+                    cov = np.linalg.inv(A.T @ A) * residual_var
+                except np.linalg.LinAlgError:
+                    cov = np.zeros((len(params), len(params)))
+            else:
+                cov = np.zeros((len(params), len(params)))
+            return params, cov
+        raise ImportError("scipy.optimize.curve_fit not available; fallback supports only 'sqrt_fit'")
 
 # Data from the experiment
 f_r =[2.798,2.613,2.466,2.380,2.332,2.108,1.824,1.767,1.559] # in Hz

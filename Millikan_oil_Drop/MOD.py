@@ -46,6 +46,13 @@ vb2 = [208,214,210,208,205,203] # drop 2
 vb3 = [274,274,277,273,279] # drop 3
 vb4 = [141,141,141,143,141,141] # drop 4
 vb5 = [206,204,205,212,208,215] # drop 5
+# mean voltage (use scalar mean for each set)
+vb_m1 = sum(vb1) / len(vb1)
+vb_m2 = sum(vb2) / len(vb2)
+vb_m3 = sum(vb3) / len(vb3)
+vb_m4 = sum(vb4) / len(vb4)
+vb_m5 = sum(vb5) / len(vb5)
+
 
 # mean fall time for balancing method
 tf_mean = [mean_(tf1), mean_(tf2), mean_(tf3), mean_(tf4), mean_(tf5)]
@@ -75,18 +82,25 @@ r3 = [ri**3 for ri in r]
 T_d = [(1+ f_mean[i]/r_mean[i]) for i in range(len(f_mean))]
 ne = [(C*T_d[i]*r3[i])/Ve[i] for i in range(len(r3))]
 
-# print("Xi (dynamic method):", xi,'\n')
-# print("Radius (m) (dynamic method):", r,'\n')
-# print("Radius cubed (m^3) (dynamic method):", r3,'\n')
-# print("T_d (dynamic method):", T_d,'\n')
-# print("Calculated charge (C) (dynamic method):", ne,'\n')
+print("Xi (dynamic method):", xi,'\n')
+print("Radius (m) (dynamic method):", r,'\n')
+print("Radius cubed (m^3) (dynamic method):", r3,'\n')
+print("T_d (dynamic method):", T_d,'\n')
+print("Calculated charge (C) (dynamic method):", ne,'\n')
 
 # balancing method
 
 xi_b = [D*v*1e-4 for v in v_bal]
 r_b = [(-zeta + (zeta**2 + x)**0.5) for x in xi_b]
 r3_b = [ri**3 for ri in r_b]
-ne_b = [(C*r3_b[i])/vb1[i] for i in range(len(r3_b))]
+ne_b = []
+# use the scalar mean voltages and append to ne_b (balancing-method results)
+ne_b.append((C*r3_b[0]) / vb_m1)
+ne_b.append((C*r3_b[1]) / vb_m2)
+ne_b.append((C*r3_b[2]) / vb_m3)
+ne_b.append((C*r3_b[3]) / vb_m4)
+ne_b.append((C*r3_b[4]) / vb_m5)
+
 print("Xi (balancing method):", xi_b,'\n')
 print("Radius (m) (balancing method):", r_b,'\n')
 print("Radius cubed (m^3) (balancing method):", r3_b,'\n')
